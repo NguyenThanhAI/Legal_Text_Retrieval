@@ -21,7 +21,7 @@ def get_args():
     parser.add_argument("--encoding_mode", default="utf-8", type=str)
     parser.add_argument("--num_doc_chosen", default=10000, type=int)
     parser.add_argument("--num_neg_doc", type=int, default=25)
-    parser.add_argument("--window", type=int, default=200)
+    parser.add_argument("--window", type=int, default=100)
     
     args = parser.parse_args()
     
@@ -60,8 +60,8 @@ if __name__ == "__main__":
         
         tokens = doc_data[doc]["text"]
         
-        if len(tokens) <= 2 * window:
-            seg_len = int(0.7 * len(tokens))
+        if len(tokens) <= int(1.5 * window):
+            seg_len = int(0.66 * len(tokens))
         else:
             seg_len = window
         
@@ -94,7 +94,7 @@ if __name__ == "__main__":
         for n_doc in neg_doc_list:
             tokens = doc_data[n_doc]["text"]
             
-            if len(tokens) <= int(1.2 * window):
+            if len(tokens) <= int(1.4 * window):
                 seg_len = int(0.7 * len(tokens))
             else:
                 seg_len = window

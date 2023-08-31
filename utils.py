@@ -62,7 +62,7 @@ def segmentize(sentence: str, stride: int=100, window:int=200) -> Dict[str, str]
     else:
         for j in range(0, len(tokenized_sent), stride):
             seg = tokenized_sent[j:j+window]
-            if len(seg) <= int(0.3 * window):
+            if len(seg) <= int(0.5 * window):
                 continue
             derived_sent["pos{}".format(j)] = " ".join(seg)
             

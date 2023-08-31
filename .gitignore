@@ -27,6 +27,7 @@ checkpoint
 
 generated_data/
 saved_model/
+unsupervised_data/
 
 workspace/
 

@@ -83,7 +83,7 @@ if __name__ == "__main__":
     print("Num law: {}".format(count))
     print("Create legal dict from raw data")
     with open(os.path.join(save_dir, "legal_dict.json"), "w", encoding=encoding_mode) as outfile:
-        json.dump(save_dict, outfile)
+        json.dump(save_dict, outfile, indent=3)
         
     corpus_path_train = os.path.join(data_dir, "train_question_answer.json")
     items = load_json(path=corpus_path_train, encoding=encoding_mode)["items"]
@@ -164,9 +164,9 @@ if __name__ == "__main__":
         with open(os.path.join(save_path, "doc_refers_segments"), "wb") as f:
             pickle.dump(doc_refers_segments, f)
         with open(os.path.join(save_path, "legal_dict_segments.json"), "w", encoding=encoding_mode) as f:
-            json.dump(save_dict_segments, f)
+            json.dump(save_dict_segments, f, indent=3)
         with open(os.path.join(save_path, "legal_dict_tokens.json"), "w", encoding=encoding_mode) as f:
-            json.dump(save_dict_tokens, f)
+            json.dump(save_dict_tokens, f, indent=3)
     else:
         with open(os.path.join(save_path, "documents_manual"), "rb") as documents_file:
             documents = pickle.load(documents_file)
@@ -332,7 +332,7 @@ if __name__ == "__main__":
         os.makedirs(os.path.join(save_dir, "tevatron_data", "train_dir"), exist_ok=True)
         
     with open(os.path.join(save_dir, "tevatron_data", "train_dir", "train.jsonl"), "w", encoding=encoding_mode) as f:
-        json.dump(train_data, f)
+        json.dump(train_data, f, indent=3)
         
         
     
@@ -366,10 +366,10 @@ if __name__ == "__main__":
         os.makedirs(os.path.join(save_dir, "tevatron_data", "corpus"), exist_ok=True)
         
     with open(os.path.join(save_dir, "tevatron_data", "corpus", "corpus.jsonl"), "w", encoding=encoding_mode) as f:
-        json.dump(data, f)
+        json.dump(data, f, indent=3)
         
     with open(os.path.join(save_dir, "tevatron_passage_id_to_index_group.json"), "w") as f:
-        json.dump(passage_id_to_index_group, f)
+        json.dump(passage_id_to_index_group, f, indent=3)
         
     print("================================================Create dev.jsonl====================================")
     
@@ -398,4 +398,4 @@ if __name__ == "__main__":
         os.makedirs(os.path.join(save_dir, "tevatron_data", "dev_dir"), exist_ok=True)
         
     with open(os.path.join(save_dir, "tevatron_data", "dev_dir", "train.jsonl"), "w", encoding=encoding_mode) as f:
-        json.dump(dev_data, f)
+        json.dump(dev_data, f, indent=3)

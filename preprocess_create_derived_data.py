@@ -6,7 +6,7 @@ from tqdm import tqdm
 import numpy as np
 from rank_bm25 import BM25Plus, BM25Okapi, BM25L, BM25
 
-from utils import bm25_tokenizer, calculate_f2, str2bool, segmentize, tokenizing
+from utils import bm25_tokenizer, calculate_f2, str2bool, basic_tokenizer, create_sliding_window
 
 
 class Config:
@@ -21,10 +21,10 @@ def get_args():
     parser.add_argument("--data_dir", default=r"E:\ZALO2021\zac2021-ltr-data\zac2021-ltr-data", type=str, help="directory of training data")
     parser.add_argument("--save_dir", default="./generated_data", type=str, help="directory of training data")
     parser.add_argument("--encoding_mode", default="utf-8", type=str)
-    parser.add_argument("--load_docs", type=str2bool, default=True)
-    parser.add_argument("--top_n", type=int, default=25)
-    parser.add_argument("--stride", type=int, default=75)
-    parser.add_argument("--window", type=int, default=150)
+    parser.add_argument("--load_docs", type=str2bool, default=False)
+    parser.add_argument("--top_n", type=int, default=20)
+    parser.add_argument("--stride", type=int, default=128)
+    parser.add_argument("--window", type=int, default=256)
     args = parser.parse_args()
     
     return args
@@ -148,14 +148,15 @@ if __name__ == "__main__":
                 tokens = bm25_tokenizer(article_full)
                 documents.append(tokens)
                 doc_refers.append([law_id, article_id, article_full])
-                tokenized_sent = tokenizing(article_text)
-                segmented = segmentize(sentence=article_text, stride=stride, window=window)
-                doc_refers_segments.append([law_id, article_id, article_title, segmented])
+                tokenized_sent = basic_tokenizer(article_text)
+                segmented = create_sliding_window(tokenized_sent=tokenized_sent, stride=stride, window=window)
+                preprocessed_article_title = " ".join(basic_tokenizer(article_title))
+                doc_refers_segments.append([law_id, article_id, preprocessed_article_title, segmented])
                 concat_id = law_id + "_" + article_id
                 if concat_id not in save_dict_segments:
-                    save_dict_segments[concat_id] = {"title": article_title, "text": segmented}
+                    save_dict_segments[concat_id] = {"title": preprocessed_article_title, "text": segmented}
                 if concat_id not in save_dict_tokens:
-                    save_dict_tokens[concat_id] = {"title": article_title, "text": tokenized_sent}
+                    save_dict_tokens[concat_id] = {"title": preprocessed_article_title, "text": tokenized_sent}
 
         with open(os.path.join(save_path, "documents_manual"), "wb") as documents_file:
             pickle.dump(documents, documents_file)
@@ -261,7 +262,7 @@ if __name__ == "__main__":
         
         
         tokenized_query = bm25_tokenizer(question)
-        preprocessed_query = " ".join(tokenizing(question))
+        preprocessed_query = " ".join(basic_tokenizer(question))
         doc_scores = bm25.get_scores(tokenized_query)
         
         query_data["query_id"] = question_id
@@ -307,7 +308,12 @@ if __name__ == "__main__":
                 concat_id = pred[0] + "_" + pred[1]
                 segments = doc_data[concat_id]["text"]
                 #segments = segmentize(sentence=sentence, stride=stride, window=window)
-                for seg in segments:
+                seg_list = list(segments.keys())
+                if len(seg_list) >= 3:
+                    chosen_seg = np.random.choice(seg_list, size=3)
+                else:
+                    chosen_seg = seg_list
+                for seg in chosen_seg:
                     save_dict = {}
                     save_dict["question"] = preprocessed_query
                     save_dict["document"] = doc_data[concat_id]["title"] + " " + segments[seg]
@@ -383,7 +389,7 @@ if __name__ == "__main__":
 
         question_id = item["question_id"]
         question = item["question"]
-        preprocessed_query = " ".join(tokenizing(question))
+        preprocessed_query = " ".join(basic_tokenizer(question))
 
         query_data["query_id"] = question_id
         query_data["query"] = preprocessed_query

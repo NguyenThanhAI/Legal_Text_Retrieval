@@ -24,6 +24,7 @@ checkpoint
 *.gif
 *.ipynb
 *.txt
+*.zip
 
 generated_data/
 saved_model/

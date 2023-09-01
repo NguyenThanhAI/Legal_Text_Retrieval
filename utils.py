@@ -5,7 +5,7 @@ from underthesea import word_tokenize
 import os
 import json
 
-from typing import Dict
+from typing import Dict, List
 
 
 number = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
@@ -77,4 +77,40 @@ def segmentize(sentence: str, stride: int=100, window:int=200) -> Dict[str, str]
 #     segments = segmentize(sentence=sentence, stride=75, window=150)
 #     for seg in segments:
 #         print("Segment: {}".format(segments[seg]))
-              
+
+
+_WORD_SPLIT = re.compile("([.,!?\"/':;)(])")
+
+def basic_tokenizer(sentence):
+    """Very basic tokenizer: split the sentence into a list of tokens."""
+    words = []
+    for space_separated_fragment in sentence.strip().split():
+        words.extend(_WORD_SPLIT.split(space_separated_fragment))
+        # return [w.lower() for w in words if w not in stop_words and w != '' and w != ' ']
+    return [w.lower() for w in words if w != '' and w != ' ' and w not in string.punctuation and w not in chars]
+
+
+def create_sliding_window(tokenized_sent: List[str], stride: int=128, window:int=256):
+    derived_sent: Dict[int, str] = {}
+    if len(tokenized_sent) <= window:
+        derived_sent["pos{}".format(0)] = " ".join(tokenized_sent)
+    else:
+        for j in range(0, len(tokenized_sent), stride):
+            seg = tokenized_sent[j:j+window]
+            if len(seg) <= int(0.75 * window):
+                continue
+            derived_sent["pos{}".format(j)] = " ".join(seg)
+            
+    return derived_sent
+
+
+# with open(os.path.join("generated_data", "legal_dict.json"), "r", encoding="utf-8") as f:
+#     doc_data = json.load(f)
+    
+# for k, v in doc_data.items():
+#     sentence = doc_data[k]["text"]
+#     print("Original: {}".format(sentence))
+#     tokenized_sent = basic_tokenizer(sentence=sentence)
+#     segments = create_sliding_window(tokenized_sent=tokenized_sent, stride=75, window=150)
+#     for seg in segments:
+#         print("Segment {}: {}".format(seg, segments[seg]))

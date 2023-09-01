@@ -19,9 +19,9 @@ def get_args():
     parser.add_argument("--legal_dict_json", type=str, default="saved_model/legal_dict_tokens.json")
     parser.add_argument("--save_dir", type=str, default="unsupervised_data")
     parser.add_argument("--encoding_mode", default="utf-8", type=str)
-    parser.add_argument("--num_doc_chosen", default=10000, type=int)
+    parser.add_argument("--num_doc_chosen", default=5000, type=int)
     parser.add_argument("--num_neg_doc", type=int, default=25)
-    parser.add_argument("--window", type=int, default=100)
+    parser.add_argument("--window", type=int, default=256)
     
     args = parser.parse_args()
     
@@ -60,13 +60,13 @@ if __name__ == "__main__":
         
         tokens = doc_data[doc]["text"]
         
-        if len(tokens) <= int(1.5 * window):
-            seg_len = int(0.66 * len(tokens))
+        if len(tokens) <= int(2.5 * window):
+            seg_len = int(0.4 * len(tokens))
         else:
             seg_len = window
         
-        pos_1 = random.randint(0, int(0.2 * len(tokens)))
-        pos_2 = random.randint(int(0.4 * len(tokens)), int(0.6 * len(tokens)))
+        pos_1 = random.randint(0, int(0.1 * len(tokens)))
+        pos_2 = random.randint(int(0.5 * len(tokens)), int(0.6 * len(tokens)))
         
         if np.random.rand() < 0.5:
             que = pos_1
@@ -77,7 +77,7 @@ if __name__ == "__main__":
             
         
         query_data["query_id"] = doc + "_" + "pos{}".format(que)
-        query_data["query"] = " ".join(tokens[que:que+seg_len])
+        query_data["query"] = doc_data[doc]["title"] + " " + " ".join(tokens[que:que+seg_len])
         
         query_data["positive_passages"] = []
         
@@ -99,7 +99,7 @@ if __name__ == "__main__":
             else:
                 seg_len = window
                 
-            pos = random.randint(0, int(0.25 * len(tokens)))
+            pos = random.randint(0, int(0.3 * len(tokens)))
             
             save_dict_teva = {}
             save_dict_teva["docid"] = n_doc + "_" + "pos{}".format(pos)

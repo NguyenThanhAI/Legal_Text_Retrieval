@@ -191,7 +191,7 @@ def load_legal_data(legal_dict_segments_json, passage_id_to_index_group, encodin
         #print(passage_id_to_index_group[concat_id], indices)
         assert passage_id_to_index_group[concat_id] == indices
 
-    print("Num laws: {}".format(legal_list))
+    print("Num laws: {}".format(len(legal_list)))
     
     return legal_list
 

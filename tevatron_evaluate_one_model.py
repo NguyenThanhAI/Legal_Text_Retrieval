@@ -9,7 +9,7 @@ import argparse
 import os
 import pickle
 import glob
-from utils import bm25_tokenizer, calculate_f2, load_bm25, load_encoded_legal_data, load_encoded_question_data, load_json, compute_overall_emb_legal_data
+from utils import bm25_tokenizer, calculate_f2, load_bm25, load_encoded_legal_data, load_encoded_question_data, load_json, compute_overall_emb_legal_data, compute_overall_score
 
 from sentence_transformers import util
 
@@ -80,7 +80,7 @@ if __name__ == "__main__":
     # emb_legal_data = np.stack(emb_legal_data_new, axis=0)
     # assert emb_legal_data.shape[0] == 61425
     
-    emb_legal_data = compute_overall_emb_legal_data(emb_legal_data=emb_legal_data, passage_id_to_index_group=passage_id_to_index_group)
+    #emb_legal_data = compute_overall_emb_legal_data(emb_legal_data=emb_legal_data, passage_id_to_index_group=passage_id_to_index_group)
     
     top_n = 61425
     
@@ -101,6 +101,8 @@ if __name__ == "__main__":
         quest_emb = question_emb_dict[idx]
         scores = util.cos_sim(torch.from_numpy(quest_emb), torch.from_numpy(emb_legal_data))
         scores = scores.squeeze(0).numpy()
+        #scores = compute_overall_emb_legal_data(emb_legal_data=scores, passage_id_to_index_group=passage_id_to_index_group)
+        scores = compute_overall_score(scores=scores, passage_id_to_index_group=passage_id_to_index_group)
         new_scores = doc_scores * scores
         max_score = np.max(new_scores)
         

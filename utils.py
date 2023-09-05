@@ -186,7 +186,7 @@ def load_legal_data(legal_dict_segments_json, passage_id_to_index_group, encodin
             indices.append(count)
             count += 1
             seg = doc_data[concat_id]["text"][segment]
-            legal_list.append(doc_data[concat_id]["text"] + " " + seg)
+            legal_list.append(doc_data[concat_id]["title"] + " " + seg)
 
         assert passage_id_to_index_group[concat_id] == indices
 

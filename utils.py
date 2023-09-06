@@ -219,7 +219,7 @@ def encode_text_data(passage_list: List[str], model: SentenceTransformer, batch_
         print("Embed shape: {}".format(emb.shape))
         emb_legal_data.append(emb)
         
-    emb_legal_data = np.array(emb_legal_data)
+    emb_legal_data = np.concatenate(emb_legal_data, axis=0)
     
     print("Shape of embedding data: {}".format(emb_legal_data.shape))
     

@@ -216,9 +216,10 @@ def encode_text_data(passage_list: List[str], model: SentenceTransformer, batch_
     for i in tqdm(range(steps)):
         text_batch = passage_list[i*batch_size:(i+1)*batch_size]
         emb = model.encode(text_batch)
+        print("Embed shape: {}".format(emb.shape))
         emb_legal_data.append(emb)
         
-    emb_legal_data = np.stack(emb_legal_data, axis=0)
+    emb_legal_data = np.array(emb_legal_data)
     
     print("Shape of embedding data: {}".format(emb_legal_data.shape))
     

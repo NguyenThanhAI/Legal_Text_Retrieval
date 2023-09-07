@@ -151,7 +151,7 @@ def compute_overall_emb_legal_data(emb_legal_data, passage_id_to_index_group):
     
     return emb_legal_data
 
-def compute_overall_score(scores, passage_id_to_index_group):
+def compute_overall_score(scores, passage_id_to_index_group, ensemble_type="max"):
     assert scores.shape[0] == 115683
     
     scores_new = []
@@ -159,7 +159,10 @@ def compute_overall_score(scores, passage_id_to_index_group):
     for concat_id in passage_id_to_index_group:
         group_scores = scores[passage_id_to_index_group[concat_id]]
         assert group_scores.shape[0] == len(passage_id_to_index_group[concat_id])
-        scores_new.append(np.max(group_scores))
+        if ensemble_type == "max":
+            scores_new.append(np.max(group_scores))
+        else:
+            scores_new.append(np.mean(group_scores))
         
     scores = np.stack(scores_new, axis=0)
     assert scores.shape[0] == 61425
@@ -216,7 +219,7 @@ def encode_text_data(passage_list: List[str], model: SentenceTransformer, batch_
     for i in tqdm(range(steps)):
         text_batch = passage_list[i*batch_size:(i+1)*batch_size]
         emb = model.encode(text_batch)
-        print("Embed shape: {}".format(emb.shape))
+        #print("Embed shape: {}".format(emb.shape))
         emb_legal_data.append(emb)
         
     emb_legal_data = np.concatenate(emb_legal_data, axis=0)

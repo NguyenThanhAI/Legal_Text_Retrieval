@@ -48,7 +48,7 @@ if __name__ == '__main__':
         print(model)
 
     save_pairs = load_pair_data(args.pair_data_path)
-    random.shuffle(save_pairs)
+    #random.shuffle(save_pairs)
     print(f"There are {len(save_pairs)} pair sentences.")
     train_examples = []
     sent1 = []

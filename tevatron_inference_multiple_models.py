@@ -30,6 +30,7 @@ def get_args():
     parser.add_argument("--passage_id_to_index_group_path", type=str, default="generated_data/tevatron_passage_id_to_index_group.json")
     parser.add_argument("--encoding_mode", default="utf-8", type=str)
     parser.add_argument("--weights", type=str, default="0.4,0.4,0.15,0.05")
+    parser.add_argument("--question", type=str, default="Khi ly hôn tài sản chia như thế nào")
     
     args = parser.parse_args()
     
@@ -50,6 +51,7 @@ if __name__ == "__main__":
     passage_id_to_index_group_path = args.passage_id_to_index_group_path
     encoding_mode = args.encoding_mode
     weights = list(map(lambda x: float(x), args.weights.split(",")))
+    question = args.question
     
     print("Load BM25 model")
     bm25 = load_bm25(bm25_path=bm25_path)
@@ -91,7 +93,6 @@ if __name__ == "__main__":
         tokenizer_dict[model_name] = tokenizer
         models_dict[model_name] = model
         
-    question = "Khi ly hôn tài sản chia như thế nào"
     
     tokenized_query = bm25_tokenizer(question)
     doc_scores = bm25.get_scores(tokenized_query)
@@ -114,29 +115,29 @@ if __name__ == "__main__":
     cos_sim = torch.cat(cos_sim, dim=0)
     
     cos_sim = torch.sum(cos_sim, dim=0).squeeze(0).numpy()
-new_scores = doc_scores * cos_sim
-max_score = np.max(new_scores)
-
-#predictions = np.argpartition(new_scores, len(new_scores) - top_n)[-top_n:]
-predictions = np.argsort(new_scores)[::-1][:top_n]
-new_scores = new_scores[predictions]
-
-new_predictions = np.where(new_scores >= (max_score - range_score))[0]
-
-map_ids = predictions[new_predictions]
-
-new_scores = new_scores[new_scores >= (max_score - range_score)]
-
-if new_scores.shape[0] > 5:
-    #predictions_2 = np.argpartition(new_scores, len(new_scores) - 5)[-5:]
-    predictions_2 = np.argsort(new_scores)[::-1][:5]
-    map_ids = map_ids[predictions_2]
-
-# true_positive = 0
-# false_positive = 0
-for idx_3, idx_pred in enumerate(map_ids):
-    pred = doc_refers[idx_pred]
-    concat_id = pred[0] + "_" + pred[1]
-    print("ID: {}".format(concat_id))
-    print("Nội dung: {}".format(doc_data[concat_id]["title"] + " " + doc_data[concat_id]["text"]))
-    print("=====================================================================================")
+    new_scores = doc_scores * cos_sim
+    max_score = np.max(new_scores)
+    
+    #predictions = np.argpartition(new_scores, len(new_scores) - top_n)[-top_n:]
+    predictions = np.argsort(new_scores)[::-1][:top_n]
+    new_scores = new_scores[predictions]
+    
+    new_predictions = np.where(new_scores >= (max_score - range_score))[0]
+    
+    map_ids = predictions[new_predictions]
+    
+    new_scores = new_scores[new_scores >= (max_score - range_score)]
+    
+    if new_scores.shape[0] > 5:
+        #predictions_2 = np.argpartition(new_scores, len(new_scores) - 5)[-5:]
+        predictions_2 = np.argsort(new_scores)[::-1][:5]
+        map_ids = map_ids[predictions_2]
+    
+    # true_positive = 0
+    # false_positive = 0
+    for idx_3, idx_pred in enumerate(map_ids):
+        pred = doc_refers[idx_pred]
+        concat_id = pred[0] + "_" + pred[1]
+        print("ID: {}".format(concat_id))
+        print("Nội dung: {}".format(doc_data[concat_id]["title"] + " " + doc_data[concat_id]["text"]))
+        print("=====================================================================================")

@@ -25,6 +25,7 @@ checkpoint
 *.ipynb
 *.txt
 *.zip
+*.jsonl
 
 generated_data/
 saved_model/

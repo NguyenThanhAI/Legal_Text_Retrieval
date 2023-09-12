@@ -14,6 +14,8 @@ from transformers import AutoConfig, AutoTokenizer
 from tevatron.modeling import EncoderOutput, DenseModel
 from utils import bm25_tokenizer, calculate_f2, load_bm25, load_encoded_legal_data, load_encoded_question_data, load_json, compute_overall_emb_legal_data, compute_overall_score, basic_tokenizer
 
+from sentence_transformers import util
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def get_args():
@@ -72,7 +74,7 @@ if __name__ == "__main__":
     for model_name in tqdm(model_names):
         encoded_legal_path = os.path.join(encoded_data_dir, model_name, "{}_corpus_emb.pkl".format(model_name))
         emb_legal_data[model_name] = load_encoded_legal_data(encoded_legal_path=encoded_legal_path)
-        
+        #print("Legal shape of model {} is {}".format(model_name, emb_legal_data[model_name].shape))
         #emb_legal_data[model_name] = compute_overall_emb_legal_data(emb_legal_data=emb_legal_data[model_name], passage_id_to_index_group=passage_id_to_index_group)
     
     print("Loading models")
@@ -102,9 +104,10 @@ if __name__ == "__main__":
         emb2 = emb_legal_data[model_name]
         tokens = tokenizer_dict[model_name].batch_encode_plus([preprocess_query], return_token_type_ids=False, padding=True, return_tensors="pt")
         tokens = tokens.to(device)
-        output: EncoderOutput = model(query=tokens)
+        output: EncoderOutput = models_dict[model_name](query=tokens)
         emb1 = output.q_reps.cpu().detach().numpy().squeeze()
-        scores = util.cos_sim(emb1, emb2)
+        #print("Emb 1 shape: {}".format(emb1.shape))
+        scores = util.cos_sim(torch.from_numpy(emb1), torch.from_numpy(emb2))
         scores = scores.squeeze(0).numpy()
         scores = compute_overall_score(scores=scores, passage_id_to_index_group=passage_id_to_index_group, ensemble_type="max")
         scores = torch.from_numpy(scores).unsqueeze(0)
@@ -133,6 +136,7 @@ if __name__ == "__main__":
 
     # true_positive = 0
     # false_positive = 0
+    print("=================================Câu trả lời=========================================")
     for idx_3, idx_pred in enumerate(map_ids):
         pred = doc_refers[idx_pred]
         concat_id = pred[0] + "_" + pred[1]

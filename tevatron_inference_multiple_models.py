@@ -19,7 +19,6 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 def get_args():
     parser = argparse.ArgumentParser()
     
-    parser.add_argument("--data_dir", type=str, default=r"E:\ZALO2021\zac2021-ltr-data\zac2021-ltr-data")
     parser.add_argument("--model_dir", type=str, default=None)
     parser.add_argument("--legal_dict_json", default="generated_data/legal_dict.json", type=str)
     parser.add_argument("--bm25_path", default="./saved_model/bm25_Plus_04_06_model_full_manual_stopword", type=str)
@@ -40,7 +39,6 @@ if __name__ == "__main__":
     
     args = get_args()
     
-    data_dir = args.data_dir
     model_dir = args.model_dir
     legal_dict_json = args.legal_dict_json
     bm25_path = args.bm25_path
@@ -117,22 +115,22 @@ if __name__ == "__main__":
     cos_sim = torch.sum(cos_sim, dim=0).squeeze(0).numpy()
     new_scores = doc_scores * cos_sim
     max_score = np.max(new_scores)
-    
+
     #predictions = np.argpartition(new_scores, len(new_scores) - top_n)[-top_n:]
     predictions = np.argsort(new_scores)[::-1][:top_n]
     new_scores = new_scores[predictions]
-    
+
     new_predictions = np.where(new_scores >= (max_score - range_score))[0]
-    
+
     map_ids = predictions[new_predictions]
-    
+
     new_scores = new_scores[new_scores >= (max_score - range_score)]
-    
+
     if new_scores.shape[0] > 5:
         #predictions_2 = np.argpartition(new_scores, len(new_scores) - 5)[-5:]
         predictions_2 = np.argsort(new_scores)[::-1][:5]
         map_ids = map_ids[predictions_2]
-    
+
     # true_positive = 0
     # false_positive = 0
     for idx_3, idx_pred in enumerate(map_ids):

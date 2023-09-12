@@ -9,7 +9,7 @@ import argparse
 import os
 import pickle
 import glob
-from utils import bm25_tokenizer, calculate_f2, load_bm25, load_json, compute_overall_emb_legal_data, compute_overall_score, basic_tokenizer, load_json
+from utils import bm25_tokenizer, calculate_f2, load_bm25, load_json, compute_overall_emb_legal_data, compute_overall_score, basic_tokenizer, load_json, load_model
 
 from sentence_transformers import util
 
@@ -17,7 +17,6 @@ from sentence_transformers import util
 def get_args():
     parser = argparse.ArgumentParser()
     
-    parser.add_argument("--data_dir", type=str, default=r"E:\ZALO2021\zac2021-ltr-data\zac2021-ltr-data")
     parser.add_argument("--model_dir", type=str, default=None)
     parser.add_argument("--legal_dict_json", default="generated_data/legal_dict.json", type=str)
     parser.add_argument("--bm25_path", default="./saved_model/bm25_Plus_04_06_model_full_manual_stopword", type=str)
@@ -52,7 +51,6 @@ if __name__ == "__main__":
     
     args = get_args()
     
-    data_dir = args.data_dir
     model_dir = args.model_dir
     legal_dict_json = args.legal_dict_json
     bm25_path = args.bm25_path
@@ -106,12 +104,14 @@ if __name__ == "__main__":
 
     cos_sim = []
 
-    for idx_2, model_path in enumerate(model_paths):
-        emb1 = models_dict[model_path].encode(preprocessed_query)
-        emb2 = emb_legal_data[model_path]
+    for idx_2, model_name in enumerate(model_names):
+        emb1 = models_dict[model_name].encode(preprocessed_query)
+        emb2 = emb_legal_data[model_name]
 
         scores = util.cos_sim(torch.from_numpy(emb1), torch.from_numpy(emb2))
         scores = scores.squeeze(0).numpy()
+        #scores = compute_overall_emb_legal_data(emb_legal_data=scores, passage_id_to_index_group=passage_id_to_index_group)
+        scores = compute_overall_score(scores=scores, passage_id_to_index_group=passage_id_to_index_group, ensemble_type="max")
         scores = torch.from_numpy(scores).unsqueeze(0)
         cos_sim.append(weights[idx_2] * scores)
 
@@ -138,6 +138,7 @@ if __name__ == "__main__":
     
     # true_positive = 0
     # false_positive = 0
+    print("=========================================Câu trả lời==================================")
     for idx_3, idx_pred in enumerate(map_ids):
         pred = doc_refers[idx_pred]
         concat_id = pred[0] + "_" + pred[1]
